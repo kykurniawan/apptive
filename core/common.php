@@ -1,12 +1,5 @@
 <?php
 
-if (!function_exists('set_flash')) {
-    function set_flash($key, $value)
-    {
-        $_SESSION[config('session.flash_key', '_flash')][$key] = $value;
-    }
-}
-
 if (!function_exists('flash')) {
     function flash($key)
     {
@@ -16,6 +9,13 @@ if (!function_exists('flash')) {
             }
         }
         return null;
+    }
+}
+
+if (!function_exists('set_flash')) {
+    function set_flash($key, $value)
+    {
+        $_SESSION[config('session.flash_key', '_flash')][$key] = $value;
     }
 }
 
@@ -181,22 +181,10 @@ if (!function_exists('start_app')) {
             throw new PageNotFoundException();
         } catch (\Throwable $th) {
             if (is_null($errorHandler)) {
-                handle_error($th);
+                error_handler($th);
             } else {
                 $errorHandler($th);
             }
         }
-    }
-}
-
-if (!function_exists('handle_error')) {
-    function handle_error($error)
-    {
-        if ($error instanceof PageNotFoundException) {
-            http_response_code(404);
-            exit();
-        }
-
-        throw $error;
     }
 }
