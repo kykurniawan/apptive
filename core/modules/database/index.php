@@ -1,6 +1,4 @@
 <?php
-defined('APP') or exit('Access denied');
-
 class Database
 {
     private static ?\PDO $connection = null;
