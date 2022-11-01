@@ -2,7 +2,6 @@
 defined('APP') or exit('Access denied');
 
 when_page('home', function () {
-    database();
     load_page('home');
 });
 
