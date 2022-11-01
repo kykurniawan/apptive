@@ -1,6 +1,4 @@
 <?php
-defined('APP') or exit('Access denied');
-
 class Validator
 {
     private $results = [];

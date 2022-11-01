@@ -2,7 +2,7 @@
 
 define('APP', true);
 
-require_once 'core/bootstrap.php';
+require_once '../core/bootstrap.php';
 
 /**
  * List of core modules to be activated.

@@ -1,5 +1,4 @@
 <?php
-defined('APP') or exit('Access denied');
 
 session_start();
 

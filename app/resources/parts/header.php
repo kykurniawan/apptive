@@ -1,7 +1,3 @@
-<?php
-defined('APP') or exit('Access denied');
-?>
-
 <nav class="navbar navbar-expand-lg bg-light border-bottom">
     <div class="container">
         <a class="navbar-brand" href="<?= url('home') ?>"><?= config('app_name') ?></a>

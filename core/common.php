@@ -1,19 +1,18 @@
 <?php
-defined('APP') or exit('Access denied');
 
 if (!function_exists('set_flash')) {
     function set_flash($key, $value)
     {
-        $_SESSION[config('flash_key', '_flash')][$key] = $value;
+        $_SESSION[config('session.flash_key', '_flash')][$key] = $value;
     }
 }
 
 if (!function_exists('flash')) {
     function flash($key)
     {
-        if (isset($_SESSION[config('flash_key', '_flash')])) {
-            if (isset($_SESSION[config('flash_key', '_flash')][$key])) {
-                return $_SESSION[config('flash_key', '_flash')][$key];
+        if (isset($_SESSION[config('session.flash_key', '_flash')])) {
+            if (isset($_SESSION[config('session.flash_key', '_flash')][$key])) {
+                return $_SESSION[config('session.flash_key', '_flash')][$key];
             }
         }
         return null;
@@ -23,8 +22,8 @@ if (!function_exists('flash')) {
 if (!function_exists('clear_flash')) {
     function clear_flash()
     {
-        if (isset($_SESSION[config('flash_key', '_flash')])) {
-            unset($_SESSION[config('flash_key', '_flash')]);
+        if (isset($_SESSION[config('session.flash_key', '_flash')])) {
+            unset($_SESSION[config('session.flash_key', '_flash')]);
         }
     }
 }
@@ -32,17 +31,30 @@ if (!function_exists('clear_flash')) {
 if (!function_exists('config')) {
     function config($key, $default = null)
     {
-        $config = require APP_PATH . '/config.php';
-        $current = $config;
-        $p = strtok($key, '.');
-        while ($p !== false) {
-            if (!isset($current[$p])) {
-                return $default;
-            }
-            $current = $current[$p];
-            $p = strtok('.');
+        $array = explode('.', $key);
+
+        $configFile = APP_PATH . '/configs/' . $array[0] . '.php';
+
+        if (!file_exists($configFile)) {
+            return $default;
         }
-        return $current;
+
+        if (sizeof($array) === 1) {
+            return require $configFile;
+        } else {
+            unset($array[0]);
+            $key = implode('.', $array);
+            $current = require $configFile;;
+            $p = strtok($key, '.');
+            while ($p !== false) {
+                if (!isset($current[$p])) {
+                    return $default;
+                }
+                $current = $current[$p];
+                $p = strtok('.');
+            }
+            return $current;
+        }
     }
 }
 
@@ -50,11 +62,11 @@ if (!function_exists('app_modules')) {
     function app_modules($modules = [])
     {
         foreach ($modules as $module) {
-            if (!file_exists(config('modules_path', APP_PATH . '/modules') . '/' . $module . '/index.php')) {
+            if (!file_exists(APP_PATH . '/modules/' . $module . '/index.php')) {
                 throw new Error('Cannot load module: ' . $module . ', make sure you have create that module.');
             }
 
-            require_once config('modules_path', APP_PATH . '/modules') . '/' . $module . '/index.php';
+            require_once APP_PATH . '/modules/' . $module . '/index.php';
         }
     }
 }
@@ -75,7 +87,7 @@ if (!function_exists('core_modules')) {
 if (!function_exists('when_page')) {
     function when_page($page, Closure $callback)
     {
-        if ($_GET[config('page_key', 'page')] === $page) {
+        if ($_GET[config('app.page_key', 'page')] === $page) {
             $callback();
             clear_flash();
             exit();
@@ -87,11 +99,11 @@ if (!function_exists('load_page')) {
     function load_page($path, $layout = 'default', $context = [])
     {
         extract($context);
-        define('PAGE_FILE', config('resources_path', APP_PATH . '/resources') . '/pages/' . $path . '.php');
+        define('PAGE_FILE', APP_PATH . '/resources/pages/' . $path . '.php');
         if (!file_exists(PAGE_FILE)) {
             throw new Error('Page file not found');
         }
-        define('LAYOUT_FILE', config('resources_path', APP_PATH . '/resources') . '/layouts/' . $layout . '.php');
+        define('LAYOUT_FILE', APP_PATH . '/resources/layouts/' . $layout . '.php');
         if (!file_exists(LAYOUT_FILE)) {
             throw new Error('Layout page file not found');
         }
@@ -103,19 +115,19 @@ if (!function_exists('load_page')) {
 if (!function_exists('part')) {
     function part($part)
     {
-        if (!file_exists(config('resources_path', APP_PATH . '/resources') . '/parts/' . $part . '.php')) {
+        if (!file_exists(APP_PATH . '/resources/parts/' . $part . '.php')) {
             throw new Error('View part not found');
         }
 
-        return config('resources_path', APP_PATH . '/resources') . '/parts/' . $part . '.php';;
+        return APP_PATH . '/resources/parts/' . $part . '.php';;
     }
 }
 
 if (!function_exists('url')) {
     function url($page, $query = [])
     {
-        $query[config('page_key', 'page')] = $page;
-        return config('base_url', 'http://127.0.0.1/') . '?' . http_build_query($query);
+        $query[config('app.page_key', 'page')] = $page;
+        return config('app.base_url', 'http://127.0.0.1/') . '?' . http_build_query($query);
     }
 }
 
@@ -160,11 +172,11 @@ if (!function_exists('start_app')) {
     function start_app(Closure $errorHandler = null)
     {
         try {
-            if (!isset($_GET[config('page_key', 'page')]) || $_GET[config('page_key', 'page')] == '') {
-                header('Location: ' . config('base_url', 'http://127.0.0.1/') . '?' . config('page_key', 'page') . '=' . config('default_page', 'home'));
+            if (!isset($_GET[config('app.page_key', 'page')]) || $_GET[config('app.page_key', 'page')] == '') {
+                header('Location: ' . config('app.base_url', 'http://127.0.0.1/') . '?' . config('app.page_key', 'page') . '=' . config('app.default_page', 'home'));
                 exit;
             }
-            require_once config('routers_path', APP_PATH . '/routers') . '/main.php';
+            require_once APP_PATH . '/routers/main.php';
             clear_flash();
             throw new PageNotFoundException();
         } catch (\Throwable $th) {
