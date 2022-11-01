@@ -96,7 +96,7 @@ if (!function_exists('when_page')) {
 }
 
 if (!function_exists('load_page')) {
-    function load_page($path, $layout = 'default', $context = [])
+    function load_page($path, $context = [], $layout = 'default')
     {
         extract($context);
         define('PAGE_FILE', APP_PATH . '/resources/pages/' . $path . '.php');
