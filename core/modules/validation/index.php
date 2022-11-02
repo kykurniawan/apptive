@@ -173,3 +173,59 @@ function in(array $array, $message = null)
         }
     };
 }
+
+
+function nullable()
+{
+    return function ($key) {
+        if (isset($_POST[$key])) {
+            if ($_POST[$key] == '') {
+                $_POST[$key] = null;
+            }
+            return validation_result(
+                true,
+                null,
+                $_POST[$key],
+                $_POST[$key],
+            );
+        }
+
+        return validation_result(
+            true,
+            null,
+            null,
+            null,
+        );
+    };
+}
+
+function bool_type($message = null)
+{
+    return function ($key) use ($message) {
+        if (isset($_POST[$key])) {
+            $value = $_POST[$key];
+            $res = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if (is_null($res)) {
+                return validation_result(
+                    false,
+                    ($message) ? $message : 'Field ' . $key . ' must be true or false',
+                    $_POST[$key],
+                    $_POST[$key],
+                );
+            }
+            return validation_result(
+                true,
+                null,
+                $_POST[$key],
+                (bool)$_POST[$key]
+            );
+        }
+
+        return validation_result(
+            true,
+            null,
+            null,
+            null,
+        );
+    };
+}
