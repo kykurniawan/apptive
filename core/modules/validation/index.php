@@ -1,5 +1,26 @@
 <?php
 
+class ValidationResult
+{
+    public $success,
+        $errorMessage,
+        $original,
+        $validated;
+
+    public function __construct($success, $errorMessage, $original, $validated)
+    {
+        $this->success = $success;
+        $this->errorMessage = $errorMessage;
+        $this->original = $original;
+        $this->validated = $validated;
+    }
+}
+
+function validation_result(bool $success, ?string $errorMessage = null, $original = null, $validated = null)
+{
+    return new ValidationResult($success, $errorMessage, $original, $validated);
+}
+
 function validate(array $rules = [])
 {
     return new class($rules)
@@ -12,11 +33,15 @@ function validate(array $rules = [])
             foreach ($rules as $key => $value) {
                 foreach ($value as $rule) {
                     $result = $rule($key);
-                    if ($result['success']) {
-                        $this->results[$key] = $result['validated'];
-                    } else {
-                        $this->errors[$key] = $result['error'];
+                    if ($result instanceof ValidationResult === false) {
+                        throw new Exception('Validation rule must return object with type ' . ValidationResult::class);
                     }
+                    if ($result->success) {
+                        $this->results[$key] = $result->validated;
+                    } else {
+                        $this->errors[$key] = $result->errorMessage;
+                    }
+                    set_flash('old__' . $key, $result->original);
                 }
             }
         }
@@ -42,18 +67,20 @@ function required(string $message = null)
 {
     return function ($key) use ($message) {
         if (!isset($_POST[$key]) || $_POST[$key] == '') {
-            return [
-                'success' => false,
-                'validated' => null,
-                'error' => ($message) ? $message : 'Field ' . $key . ' is required',
-            ];
+            return validation_result(
+                false,
+                ($message) ? $message : 'Field ' . $key . ' is required',
+                $_POST[$key],
+                null
+            );
         }
 
-        return [
-            'success' => true,
-            'validated' => $_POST[$key],
-            'error' => null
-        ];
+        return validation_result(
+            true,
+            null,
+            $_POST[$key],
+            $_POST[$key],
+        );
     };
 }
 
@@ -63,18 +90,20 @@ function max_char(int $max, string $message = null)
         if (isset($_POST[$key])) {
             $value = (string) $_POST[$key];
             if (strlen($value) > $max) {
-                return [
-                    'success' => false,
-                    'validated' => null,
-                    'error' => ($message) ? $message : $key . ' field can\'t be more than ' . $max . ' characters',
-                ];
+                return validation_result(
+                    false,
+                    ($message) ? $message : 'Field ' . $key . ' can\'t be more than ' . $max . ' characters',
+                    $_POST[$key],
+                    null,
+                );
             }
 
-            return [
-                'success' => true,
-                'validated' => $_POST[$key],
-                'error' => null
-            ];
+            return validation_result(
+                true,
+                null,
+                $_POST[$key],
+                $_POST[$key],
+            );
         }
     };
 }
@@ -84,7 +113,7 @@ function unique(string $table, string $column,  $ignore = null, string $message 
     return function ($key) use ($table, $column, $ignore, $message) {
         if (isset($_POST[$key])) {
             $value = $_POST[$key];
-            $db = Database::getConnection();
+            $db = database();
             $query = "SELECT * FROM $table WHERE $column=?";
             if ($ignore) {
                 $query .= ' AND id != ?';
@@ -102,18 +131,20 @@ function unique(string $table, string $column,  $ignore = null, string $message 
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if ($result) {
-                return [
-                    'success' => false,
-                    'validated' => null,
-                    'error' => ($message) ? $message : $key . ': ' . $value . ' already taken',
-                ];
+                return validation_result(
+                    false,
+                    ($message) ? $message : ucwords($key) . ' ' . $value . ' already taken',
+                    $_POST[$key],
+                    null
+                );
             }
 
-            return [
-                'success' => true,
-                'validated' => $value,
-                'error' => null
-            ];
+            return validation_result(
+                true,
+                null,
+                $_POST[$key],
+                $_POST[$key],
+            );
         }
     };
 }
@@ -124,18 +155,20 @@ function in(array $array, $message = null)
         if (isset($_POST[$key])) {
             $value = $_POST[$key];
             if (!in_array($value, $array)) {
-                return [
-                    'success' => false,
-                    'validated' => null,
-                    'error' => ($message) ? $message : $key . ' is invalid',
-                ];
+                return validation_result(
+                    false,
+                    ($message) ? $message : 'Field ' . $key . ' is invalid',
+                    $_POST[$key],
+                    null,
+                );
             }
 
-            return [
-                'success' => true,
-                'validated' => $value,
-                'error' => null
-            ];
+            return validation_result(
+                true,
+                null,
+                $_POST[$key],
+                $_POST[$key],
+            );
         }
     };
 }
