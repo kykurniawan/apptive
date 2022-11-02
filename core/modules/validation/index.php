@@ -40,6 +40,7 @@ function validate(array $rules = [])
                         $this->results[$key] = $result->validated;
                     } else {
                         $this->errors[$key] = $result->errorMessage;
+                        set_flash('form-error__' . $key, $result->errorMessage);
                     }
                     set_flash('old__' . $key, $result->original);
                 }

@@ -30,6 +30,14 @@ if (!function_exists('old')) {
     }
 }
 
+if (!function_exists('form_error')) {
+    function form_error($key)
+    {
+        return flash('form-error__' . $key);
+    }
+}
+
+
 if (!function_exists('clear_flash')) {
     function clear_flash()
     {
