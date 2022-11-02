@@ -1,37 +1,41 @@
 <?php
-class Validator
-{
-    private $results = [];
-    private $errors = [];
 
-    public function validate($rules = [])
+function validate(array $rules = [])
+{
+    return new class($rules)
     {
-        foreach ($rules as $key => $value) {
-            foreach ($value as $rule) {
-                $result = $rule($key);
-                if ($result['success']) {
-                    $this->results[$key] = $result['validated'];
-                } else {
-                    $this->errors[$key] = $result['error'];
+        private $results = [];
+        private $errors = [];
+
+        public function __construct(array $rules = [])
+        {
+            foreach ($rules as $key => $value) {
+                foreach ($value as $rule) {
+                    $result = $rule($key);
+                    if ($result['success']) {
+                        $this->results[$key] = $result['validated'];
+                    } else {
+                        $this->errors[$key] = $result['error'];
+                    }
                 }
             }
         }
-    }
 
-    public function fails()
-    {
-        return sizeof($this->errors) !== 0;
-    }
+        public function fails()
+        {
+            return sizeof($this->errors) !== 0;
+        }
 
-    public function results()
-    {
-        return $this->results;
-    }
+        public function results()
+        {
+            return $this->results;
+        }
 
-    public function errors()
-    {
-        return $this->errors;
-    }
+        public function errors()
+        {
+            return $this->errors;
+        }
+    };
 }
 
 function required(string $message = null)
