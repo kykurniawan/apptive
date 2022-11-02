@@ -19,6 +19,17 @@ if (!function_exists('set_flash')) {
     }
 }
 
+if (!function_exists('old')) {
+    function old($key, $default = null)
+    {
+        $result = flash('old__' . $key);
+        if ($result == null) {
+            return $default;
+        }
+        return $result;
+    }
+}
+
 if (!function_exists('clear_flash')) {
     function clear_flash()
     {
