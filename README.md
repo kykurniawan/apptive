@@ -67,11 +67,13 @@ Get PDO connection instance
 
 ### Classes
 
-#### `Validator`
-
-Validator class
+#### `ValidationResult`
 
 ### Functions
+
+#### `validation_result()`
+
+#### `validate()`
 
 #### Validation Rules
 
@@ -84,6 +86,10 @@ Validator class
 ##### `in()`
 
 # Common Functions
+
+## `old()`
+
+## `form_error()`
 
 ## `flash()`
 
