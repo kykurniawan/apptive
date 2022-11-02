@@ -1,11 +1,40 @@
 <?php
 
+if (!function_exists('set_session')) {
+    function session()
+    {
+        return new class
+        {
+            public function set(string $key, $value = null)
+            {
+                $_SESSION[config('session.key', '__')][$key] = $value;
+            }
+
+            public function get(string $key, $default = null)
+            {
+                if (isset($_SESSION[config('session.key', '__')][$key])) {
+                    return $_SESSION[config('session.key', '__')][$key];
+                }
+                return $default;
+            }
+
+            public function delete(string $key)
+            {
+                if (isset($_SESSION[config('session.key', '__')][$key])) {
+                    unset($_SESSION[config('session.key', '__')][$key]);
+                }
+            }
+        };
+    }
+}
+
+
 if (!function_exists('flash')) {
     function flash($key)
     {
-        if (isset($_SESSION[config('session.flash_key', '_flash')])) {
-            if (isset($_SESSION[config('session.flash_key', '_flash')][$key])) {
-                return $_SESSION[config('session.flash_key', '_flash')][$key];
+        if (session()->get(config('session.flash_key', '_flash'))) {
+            if (isset(session()->get(config('session.flash_key', '_flash'))[$key])) {
+                return session()->get(config('session.flash_key', '_flash'))[$key];
             }
         }
         return null;
@@ -15,7 +44,16 @@ if (!function_exists('flash')) {
 if (!function_exists('set_flash')) {
     function set_flash($key, $value)
     {
-        $_SESSION[config('session.flash_key', '_flash')][$key] = $value;
+        session()->set(config('session.flash_key', '_flash'))[$key] = $value;
+    }
+}
+
+if (!function_exists('clear_flash')) {
+    function clear_flash()
+    {
+        if (session()->get(config('session.flash_key', '_flash'))) {
+            session()->delete(config('session.flash_key', '_flash'));
+        }
     }
 }
 
@@ -34,16 +72,6 @@ if (!function_exists('form_error')) {
     function form_error($key)
     {
         return flash('form-error__' . $key);
-    }
-}
-
-
-if (!function_exists('clear_flash')) {
-    function clear_flash()
-    {
-        if (isset($_SESSION[config('session.flash_key', '_flash')])) {
-            unset($_SESSION[config('session.flash_key', '_flash')]);
-        }
     }
 }
 
@@ -104,9 +132,16 @@ if (!function_exists('core_modules')) {
 }
 
 if (!function_exists('when_page')) {
-    function when_page($page, Closure $callback)
+    function when_page($page, Closure $callback, callable $before = null)
     {
         if ($_GET[config('app.page_key', 'page')] === $page) {
+            if (is_null($before)) {
+                $callback();
+                clear_flash();
+                exit();
+            }
+
+            call_user_func($before, $page);
             $callback();
             clear_flash();
             exit();

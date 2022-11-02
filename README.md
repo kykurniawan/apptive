@@ -130,3 +130,32 @@ Get PDO connection instance
 ## `CORE_PATH`
 
 ## `APP_PATH`
+
+---
+
+config
+
+- session.key = `__`
+
+common
+
+- `session()`
+  - `set()`
+  - `get()`
+  - `delete()`
+
+validation
+
+- rules
+  - `nullable()`
+  - `bool_type()`
+
+database
+
+- class
+  - `BaseRepository`
+    - `findAll()`
+    - `find()`
+    - `create()`
+    - `update()`
+    - `delete()`
