@@ -1,20 +1,13 @@
 <?php
 
-define('APP', true);
+use Apptive\Core\Brains\App;
 
-require_once '../core/bootstrap.php';
+define('ROOT_PATH', realpath(dirname(__DIR__)));
+define('CORE_PATH', ROOT_PATH . '/core');
+define('APP_PATH', ROOT_PATH . '/app');
 
-/**
- * List of core modules to be activated.
- */
-core_modules([]);
+require_once CORE_PATH . '/bootstrap/app.php';
 
-/**
- * List of application modules to be activated.
- */
-app_modules([]);
+App::loadCoreModule('database');
 
-/**
- * Start our app.
- */
-start_app();
+App::start();
