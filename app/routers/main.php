@@ -1,5 +1,8 @@
 <?php
 
-when_page('home', function () {
-    echo 'It\'s works';
+use Apptive\Core\Brains\Response;
+use Apptive\Core\Brains\Route;
+
+Route::when('home', function () {
+    Response::make()->sendPage('home');
 });
