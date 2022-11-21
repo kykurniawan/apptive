@@ -1,5 +1,7 @@
 # Apptive
 
+> This is unfinished documentation. There will be many changes that may occur.
+
 Apptive is native php web starter.
 
 ## Routing Example
@@ -7,16 +9,16 @@ Apptive is native php web starter.
 **Show home page**
 
 ```php
-when_page('home', function () {
-    load_page('home');
+Route::when('home', function () {
+    Response::make()->sendPage('home');
 });
 ```
 
 **Redirect to about page**
 
 ```php
-when_page('home', function () {
-    redirect('home');
+Route::when('to-about', function () {
+    Route::redirect('about');
 });
 ```
 
@@ -63,65 +65,13 @@ Database conection class
 
 Get PDO connection instance
 
-## validation
-
-### Classes
-
-#### `ValidationResult`
-
-### Functions
-
-#### `validation_result()`
-
-#### `validate()`
-
-#### Validation Rules
-
-##### `required()`
-
-##### `max_char()`
-
-##### `unique()`
-
-##### `in()`
-
-# Common Functions
-
-## `old()`
-
-## `form_error()`
-
-## `flash()`
-
-## `set_flash()`
-
-## `clear_flash()`
-
-## `config()`
-
-## `app_modules()`
-
-## `core_modules()`
-
-## `when_page()`
-
-## `load_page()`
-
-## `part()`
-
-## `url()`
-
-## `redirecr()`
-
-## `method()`
-
-## `query()`
-
-## `start_app()`
-
 # Exceptions
 
 ## `PageNotFoundException`
+
+## `InvalidBeforeFunctionException`
+
+## `UnauthorizedException`
 
 # Constants
 
@@ -130,32 +80,3 @@ Get PDO connection instance
 ## `CORE_PATH`
 
 ## `APP_PATH`
-
----
-
-config
-
-- session.key = `__`
-
-common
-
-- `session()`
-  - `set()`
-  - `get()`
-  - `delete()`
-
-validation
-
-- rules
-  - `nullable()`
-  - `bool_type()`
-
-database
-
-- class
-  - `BaseRepository`
-    - `findAll()`
-    - `find()`
-    - `create()`
-    - `update()`
-    - `delete()`
